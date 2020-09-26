@@ -7,5 +7,6 @@ const { connectToSocket } = require('./stdioSocket');
 
 (async function () {
     // Check socket exists:
-    connectToSocket();
+    await connectToSocket();
+    console.log('Attached to socket:');
 })()

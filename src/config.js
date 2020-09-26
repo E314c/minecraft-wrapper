@@ -1,3 +1,4 @@
+const os = require('os');
 const path = require('path');
 const args = require('./args');
 const frozenKeys = new Set();
@@ -10,8 +11,8 @@ const defaultConfig = {
     serverPort: 25565,
 
     // Need this to be deterministic between processes, so that the attach works properly
-    socketFile: path.resolve(require('os').tmpdir(), './minecraftStdio.sock'),
-    // socketFile: path.resolve('/tmp/', './minecraftStdio.sock'),
+    // socketFile: path.resolve(args.minecraftDirectory, './minecraftStdio.sock'),
+    socketFile: os.platform() === 'win32' ? '\\\\?\\pipe\\minecraftStdio.sock' : path.resolve(os.tmpdir(), './minecraftStdio.sock')
 };
 
 const configObject = new Proxy(defaultConfig, {
