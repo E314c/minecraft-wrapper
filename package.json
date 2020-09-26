@@ -1,0 +1,25 @@
+{
+  "name": "minecraft-server-wrapper",
+  "version": "1.0.0",
+  "description": "A wrapper to help run a minecraft server",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha --recursive './src/**/*.spec.js'",
+    "attach": "node ./src/attach.js"
+  },
+  "keywords": [
+    "minecraft"
+  ],
+  "author": "e314c",
+  "license": "ISC",
+  "dependencies": {
+    "yargs": "^15.4.1"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^8.0.1"
+  }
+}
