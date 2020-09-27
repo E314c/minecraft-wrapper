@@ -3,6 +3,7 @@ const EventEmitter = require('events');
 const config = require('../config');
 const {getServerStatus, createSocket} = require('./protocol');
 const {closeSocket} = require('./socketUtil');
+const { createStdioSocketServer } = require('../stdioSocket');
 
 class MinecraftServer extends EventEmitter {
     
@@ -102,8 +103,21 @@ class MinecraftServer extends EventEmitter {
             '--nogui'
         ], {
             cwd: config.serverDirectory,
-            stdio: 'pipe'
         });
+
+        if(config.serverStdioConnectedToThisStdio) {
+            // Pipe the std* to this processes std*
+            process.stdin.pipe(this.serverProcess.stdin);
+            this.serverProcess.stdout.pipe(process.stdout);
+            this.serverProcess.stderr.pipe(process.stderr);
+        }
+
+        // Create the socket to connect directly to this server 
+        createStdioSocketServer(this.serverProcess.stdout, this.serverProcess.stdin)
+            //...Though we don't really care if it fails
+            .catch(err => {
+                console.error('[ERROR] Create create socket for server process:\n', err);
+            });
 
         this.serverProcess.on('close', (code, signal) => {
             this.serverProcess = null;
@@ -116,14 +130,21 @@ class MinecraftServer extends EventEmitter {
     }
 
     startPlayerCheck() {
-        const CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
-        // const CHECK_INTERVAL = 10 * 1000; // 10 seconds
-        this.playerCheckInterval = setInterval(this.checkForPlayers.bind(this), CHECK_INTERVAL);
+        const CHECK_INTERVAL = config.serverIdleTimeout;
+        const bound_checkForPlayers = this.checkForPlayers.bind(this);
+        this.playerCheckInterval = setInterval(async () => {
+            try {
+                await bound_checkForPlayers();
+            } catch (error) {
+                console.error('Error checking for players: ', error);
+            }
+        }, CHECK_INTERVAL);
     }
     
     async checkForPlayers() {
-        console.log(`Check found ${await this.getPlayerCount()} players online`);
-        if(await this.getPlayerCount() === 0) {
+        const playerCount = await this.getPlayerCount();
+        console.log(`Check found ${playerCount} players online`);
+        if (playerCount === 0) {
             if(this.lastCheckHadPlayers) {
                 this.lastCheckHadPlayers = false;
             } else {
@@ -140,7 +161,7 @@ class MinecraftServer extends EventEmitter {
 
     // API Calls
     async getPlayerCount() {
-        const socket = await createSocket(this.serverPort, 'localhost');
+        const socket = await createSocket(config.serverPort, 'localhost');
         const serverStatus = await getServerStatus(socket);
         if (!(serverStatus && serverStatus.players)) {
             throw new Error(`Unexpected result from status check: ${JSON.stringify(serverStatus)}`)

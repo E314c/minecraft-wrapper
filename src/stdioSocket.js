@@ -16,13 +16,14 @@ async function cleanupSocketFile(warn= false) {
     });
 }
 
+
 async function createStdioSocketServer(input = process.stdin, output = process.stdout) {
     // Verify types
     if(!(input instanceof Readable)) {
         throw new TypeError('Input must be Readable');
     }
     if(!(output instanceof Writable)) {
-        throw new TypeError('Output must be Writable')
+        throw new TypeError('Output must be Writable');
     }
 
     const { socketFile } = config;
@@ -31,8 +32,8 @@ async function createStdioSocketServer(input = process.stdin, output = process.s
 
     // Create IPC server:
     const server = net.createServer(socket => {
-        socket.pipe(input); // take socket ouput as this input
-        output.pipe(socket);
+        socket.pipe(output);
+        input.pipe(socket);
     });
     
     await new Promise((resolve,reject) => {

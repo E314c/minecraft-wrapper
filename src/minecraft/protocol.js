@@ -8,7 +8,7 @@ async function createSocket(port, host) {
     return new Promise((resolve, reject) => {
         try {
             const connection = net.createConnection(port, host, () => {
-                return resolve(connection);
+                resolve(connection);
             });
             connection.once('error', (e) => {
                 reject(e);
@@ -58,7 +58,6 @@ async function handshake(socket, login = false) {
 
 // Wrappers
 async function getServerStatus(socket) {
-
     // Local Variables
     let receivedData = Buffer.alloc(0);
     let promiseResolver, promiseRejector;
