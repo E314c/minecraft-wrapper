@@ -9,7 +9,7 @@ const defaultConfig = {
     serverDirectory: args.minecraftDirectory,
     serverFile: args.minecraftFile,
     serverPort: 25565,
-    serverStdioConnectedToThisStdio: false, // TODO: Take from arg
+    serverStdioConnectedToThisStdio: args["attach-minecraft-terminal"],
     serverIdleTimeout: Math.round(args.timeout * 60 * 1000), // convert minutes to milliseconds
 
     // Need this to be deterministic between processes, so that the attach works properly
