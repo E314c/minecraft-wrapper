@@ -1,4 +1,4 @@
-// Initialise the config from args
+// Note: some dependencies must be required at runtime to avoid config lockdown.
 const { spawn } = require('child_process');
 const args = require('./args');
 
@@ -32,6 +32,12 @@ const args = require('./args');
         // Start up the proxy server
         const createTcpProxy = require('./tcpProxy');
         await createTcpProxy();
+
+        // If auto start requested, start spinning up the minecraft server
+        if(args["autostart-server"]) {
+            const MinecraftServer = require('./minecraft/server');
+            await MinecraftServer.start();
+        };
     } catch (e) {
         console.error('Fatal Error in main:\n', e);
         process.exit(1);

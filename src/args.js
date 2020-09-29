@@ -28,5 +28,9 @@ module.exports = require('yargs')
         description: `attaches the stdio from the minecraft server to this process's stdio.`,
         type: 'boolean'
     })
+    .option('autostart-server', {
+        description: 'start spinning up minecraft server as soon as the wrapper starts',
+        type: 'boolean'
+    })
     .help()
     .argv;

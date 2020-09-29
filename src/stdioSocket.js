@@ -32,7 +32,7 @@ async function createStdioSocketServer(input = process.stdin, output = process.s
 
     // Create IPC server:
     const server = net.createServer(socket => {
-        socket.pipe(output);
+        socket.pipe(output, { end: false });    // don't close the ouput stream if the socket is closed from the other side. We want to allow the socket to be connected/disconnected many times.
         input.pipe(socket);
     });
     
@@ -45,6 +45,7 @@ async function createStdioSocketServer(input = process.stdin, output = process.s
 
         server.listen(socketFile, () => {
             server.removeListener('error', reject);
+            // TODO: LINUX: CHMOD the socketfile to be writable by the group
             resolve();
         });
     });

@@ -107,7 +107,7 @@ class MinecraftServer extends EventEmitter {
 
         if(config.serverStdioConnectedToThisStdio) {
             // Pipe the std* to this processes std*
-            process.stdin.pipe(this.serverProcess.stdin);
+            process.stdin.pipe(this.serverProcess.stdin, {end: false}); // Don't close the server stdin when process stdin closes (incase of detached mode)
             this.serverProcess.stdout.pipe(process.stdout);
             this.serverProcess.stderr.pipe(process.stderr);
         }
@@ -150,6 +150,7 @@ class MinecraftServer extends EventEmitter {
             } else {
                 // Wind down the server
                 console.log('No users online; shutting down server');
+                // TODO: Send '/save-all' to server and wait for it to process before shutting down
                 this.serverProcess.kill();
                 clearInterval(this.playerCheckInterval);
             }
